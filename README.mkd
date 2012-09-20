@@ -1,0 +1,10 @@
+Treasure Chest
+==============
+
+An obsessively designed implementation of the board game, *Treasure
+Chest*. Two players move their pieces in an attempt to grab the treasure
+in the middle of the board.
+
+This was an assignment for the COSC121 course at the University of
+Canterbury. It was probably beyond what was expected for a first year
+course, but it was fun to write nevertheless.
