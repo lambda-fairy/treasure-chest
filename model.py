@@ -5,48 +5,37 @@ from __future__ import print_function
 
 from cStringIO import StringIO
 from functools import partial
-from itertools import cycle
 import operator
+import string
 import sys
 
 EMPTY = '.'
 X, Y, S, T = ('X', 'Y', 'S', 'T')
-
-MIN_SIZE, MAX_SIZE = 5, 9
+PLAYERS = (X, Y)
 
 def isplayer(piece):
-    return piece in (X, Y)
+    return piece in PLAYERS
 
 def issolid(piece):
     return isplayer(piece) or piece == S
 
-MESSAGES = {
-        'prompt_size': "Board size: ",
-        'prompt_move': "Player {0}, enter move: ",
-        'win': "Win for player {0}!",
-        }
+MIN_SIZE, MAX_SIZE = 5, 9
 
-ERRORS = {
-        'size': "Size must be an odd number between {0} and {1}".format(MIN_SIZE, MAX_SIZE),
-        'move_length': "Input must be in the format A1:B2",
-        'move_format': "Input must be in the format A1:B2",
-        'off_board': "You try to go off the board, but that just shows how far you've gone off the rails.",
-        'supporter_on_treasure': "You can't move a supporter piece onto the treasure, you saucy boy.",
-        'overlap': "You can't move a piece on top of another one.",
-        'groping_empty_space': "You grope madly at the patch of empty space, to no avail.",
-        'moving_other_player': "You can't move the other player. Jerk.",
-        'already_moved': "You can't move the piece that was moved last.",
-        'move_illegal': "You must move the as far as possible horizontally, vertically or diagonally.",
-        }
+def is_valid_size(size):
+    return size % 2 == 1 and MIN_SIZE <= size <= MAX_SIZE
+
+ERROR_TYPES = frozenset([
+    'size', 'move_length', 'move_format', 'off_board',
+    'supporter_on_treasure', 'overlap', 'groping_empty_space',
+    'moving_other_player', 'already_moved', 'move_illegal'
+    ])
 
 class InputError(ValueError):
     """Represents a critical failure between desk and chair."""
     def __init__(self, key):
-        message = ERRORS[key]
-        super(InputError, self).__init__(message)
-
-# The letters of the alphabet from A to Z
-letters = [chr(x) for x in range(ord('A'), ord('Z')+1)]
+        assert key in ERROR_TYPES
+        self.key = key
+        super(InputError, self).__init__(key)
 
 class Board:
     """Represents a game of Treasure Chest."""
@@ -73,7 +62,7 @@ class Board:
         output = partial(print, file=file)
         for y, row in enumerate(self.board, 1):
             output(y, *row)
-        output(' ', *letters[:self.size])
+        output(' ', *string.ascii_uppercase[:self.size])
 
     def move(self, player, start, end):
         """Move a piece from one point to another.
@@ -182,7 +171,7 @@ class Board:
 
 def make_board(size):
     """Create an initial board of a certain size. The size must be odd."""
-    if size < 3 or not odd(size):
+    if not is_valid_size(size):
         raise ValueError('invalid size: {0}'.format(size))
 
     board = matrix((size, size), default=EMPTY)
@@ -200,9 +189,6 @@ def make_board(size):
     board[mid][mid] = T
 
     return board
-
-def odd(n):
-    return n % 2 == 1
 
 def matrix(sizes, default=None):
     """Make a nested list, filled with a default value."""
@@ -226,87 +212,5 @@ def add_tuple(xs, ys):
     return tuple(map(operator.add, xs, ys))
 
 def in_board(pos, size):
+    """Return whether a pair represents a valid point on the board."""
     return 0 <= pos[0] < size and 0 <= pos[1] < size
-
-
-# ======================================================================
-# Main game loop
-# ----------------------------------------------------------------------
-
-def play(board_cfg=None):
-    """Play a game of Treasure Chest on the command line, optionally
-    with an initial board state."""
-
-    # Initialize the board
-    if board_cfg is None:
-        size = read_with(parse_size, 'prompt_size')
-        board = Board(size)
-    else:
-        board = Board(board_cfg)
-
-    # Play the game
-    winner = None
-    for player in cycle((X, Y)):
-        # Word of God dictates the board shall henceforth be surrounded
-        # by blank lines
-        print()
-        board.display()
-        print()
-
-        # Read the next move and execute it in one go
-        def parse_and_move(s):
-            start, end = parse_move(s)
-            return board.move(player, start, end)
-        winner = read_with(parse_and_move, 'prompt_move', player)
-
-        # Stop if we have a winner
-        if winner is not None:
-            break
-
-    # Burma Shave
-    print(MESSAGES['win'].format(winner))
-
-def read_with(reader, key, *args):
-    """Prompt the user for input, then pass the resulting string to the
-    reader function. If it raises an InputError, display the error and
-    prompt again."""
-    message = MESSAGES[key].format(*args)
-    while True:
-        try:
-            return reader(raw_input(message).strip())
-        except InputError as ex:
-            print(ex.message)
-
-def parse_size(s):
-    try:
-        size = int(s)
-    except ValueError:
-        raise InputError('size')
-
-    if odd(size) and MIN_SIZE <= size <= MAX_SIZE:
-        return size
-    else:
-        raise InputError('size')
-
-def parse_move(s):
-    """Parse a move: a string in the form ``A1:Z2`` specifying a start
-    and end position."""
-    if len(s) != 5:
-        raise InputError('move_length')
-
-    parts = s.split(':')
-    if len(parts) != 2:
-        raise InputError('move_format')
-
-    return map(parse_position, parts)
-
-def parse_position(s):
-    """Parse a position: a string in the form ``P9`` that specifies a
-    location on the board."""
-    if len(s) != 2 or not s[0].isalpha() or not s[1].isdigit():
-        raise InputError('move_format')
-
-    return letters.index(s[0].upper()), int(s[1]) - 1
-
-if __name__ == '__main__':
-    play()
