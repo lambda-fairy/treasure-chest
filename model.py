@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """The Treasure Chest model: the 'M' part of MVC"""
 
 from __future__ import print_function
