@@ -5,9 +5,16 @@ from __future__ import print_function
 
 from itertools import cycle
 import string
+import sys
 
-from model import Board, InputError, PLAYERS, is_valid_size
-import messages as M
+from .model import Board, InputError, PLAYERS, is_valid_size
+from .messages import ERRORS, MESSAGES
+
+def main():
+    try:
+        play()
+    except KeyboardInterrupt:
+        print('\nReceived terminate signal; quitting', file=sys.stderr)
 
 def play(board_cfg=None):
     """Play a game of Treasure Chest on the command line, optionally
@@ -40,18 +47,18 @@ def play(board_cfg=None):
         winner = read_with(parse_and_move, 'prompt_move', player)
 
     # Burma Shave
-    print(M.MESSAGES['win'].format(winner))
+    print(MESSAGES['win'].format(winner))
 
 def read_with(reader, key, *args):
     """Prompt the user for input, then pass the resulting string to the
     reader function. If it raises an InputError, display the error and
     prompt again."""
-    message = M.MESSAGES[key].format(*args)
+    message = MESSAGES[key].format(*args)
     while True:
         try:
             return reader(raw_input(message).strip())
         except InputError as ex:
-            print(M.ERRORS[ex.key])
+            print(ERRORS[ex.key])
 
 def parse_size(s):
     try:

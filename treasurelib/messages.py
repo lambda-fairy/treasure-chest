@@ -1,6 +1,6 @@
 """Messages used by the command line interface"""
 
-from model import MIN_SIZE, MAX_SIZE, ERROR_TYPES
+from .model import MIN_SIZE, MAX_SIZE, ERROR_TYPES
 
 # Change this to True if submitting to university
 BORING = False

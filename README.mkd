@@ -8,3 +8,44 @@ in the middle of the board.
 This was an assignment for the COSC121 course at the University of
 Canterbury. My solution was probably beyond what was expected for a
 first year course, but it was fun to write nonetheless.
+
+
+Setting up
+----------
+
+*Treasure Chest* requires [Python 2.7][]. Earlier versions may work, but
+I haven't tested them. It does *not* run under Python 3.
+
+[Python 2.7]: http://python.org/download/
+
+To use the graphical interface, you also need the widget library
+*Tkinter*. If you downloaded Python from the official website, Tkinter
+should be installed automatically.
+
+However, to save space, most Linux distributions package Tkinter
+separately. If you use Debian or Ubuntu, it can be installed using:
+
+```sh
+sudo apt-get install python-tk
+```
+
+Other distros should work with similar commands.
+
+
+Getting started
+---------------
+
+*Treasure Chest* has two interfaces: a basic command-line interface
+(CLI) and an advanced graphical interface (GUI).
+
+To run the command-line version, type:
+
+```sh
+python play_cli
+```
+
+To run the graphical version, type:
+
+```sh
+python play_gui
+```
