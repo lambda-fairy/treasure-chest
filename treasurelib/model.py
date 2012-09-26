@@ -160,6 +160,10 @@ class Board:
         x, y = pos
         self.board[y][x] = piece
 
+    def __iter__(self):
+        """Allow iterating over the rows of the board."""
+        return iter(self.board)
+
     def __str__(self):
         out = StringIO()
         self.display(file=out)
