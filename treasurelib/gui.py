@@ -3,10 +3,13 @@
 
 from __future__ import print_function
 
+from functools import partial
 from Tkinter import *
 import tkMessageBox
 
-from model import Board, EMPTY, InputError, X, Y
+from .model import Board, EMPTY, InputError
+from .model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
+from .messages import ERRORS, MESSAGES
 
 COPYRIGHT = u'''
 \xA9 2012 Chris Wong.
@@ -43,7 +46,11 @@ class Application(Frame):
 
         self.master['menu'] = self.menu
 
-        self.board = TkBoard(self)
+        var = StringVar()
+        self.status = Label(self, textvariable=var, font='Verdana 16')
+        self.status.pack(fill=X, pady=5)
+
+        self.board = TkBoard(self, var.set)
         self.new()
 
     def new(self):
@@ -54,8 +61,10 @@ class Application(Frame):
         tkMessageBox.showinfo('Treasure Chest', COPYRIGHT)
 
 class TkBoard(Frame):
-    def __init__(self, master):
+    def __init__(self, master, set_status):
         Frame.__init__(self, master)
+        self.set_status = set_status
+        self.set_status('hello')
 
     def restart(self, size):
         """Restart the Treasure Chest game."""
@@ -91,12 +100,25 @@ class TkBoard(Frame):
     def handle_click(self, button):
         self.controller.handle_click(button)
 
+    def finish(self):
+        """The game has finished: disable all the buttons."""
+        for row in self.squares:
+            for child in row:
+                child['state'] = DISABLED
+
 class Controller:
     def __init__(self, view, size):
         self.board = Board(size)
         self.view = view
-        self.handle_click = self.start_move
-        self.player = X
+        self.player = PLAYER_X
+
+        self.handler, message = self.start_move_()
+        self.view.set_status(message)
+
+    def handle_click(self, button):
+        self.handler, message = self.handler(button)
+        if message is not None:
+            self.view.set_status(message)
 
     def start_move(self, button):
         # Get all the valid moves starting from where the user clicked
@@ -110,7 +132,11 @@ class Controller:
         # Only try to finish the move if there are actual valid moves
         if self.valid_ends:
             button.excite(SELECTED)
-            self.handle_click = self.finish_move
+            return self.finish_move_()
+        else:
+            return self.start_move_()
+
+    start_move_ = lambda self: (self.start_move, MESSAGES['prompt_move'].format(self.player))
 
     def finish_move(self, button):
         end = (button.x, button.y)
@@ -120,23 +146,30 @@ class Controller:
             self.next_player()
             self.view.update_view()
             if winner is None:
-                self.handle_click = self.start_move
+                # Give control to the next player
+                return self.start_move_()
             else:
-                self.handle_click = self.ignore
-                print('Win for %s!' % winner)
+                # Finish him!
+                self.view.finish()
+                return self.end_game_(winner)
         else:
             # Prompt for another move
             self.view.update_view()
-            self.handle_click = self.start_move
+            return self.start_move_()
 
-    def ignore(self, *args):
-        pass
+    finish_move_ = lambda self: (self.finish_move, None)
+
+    def end_game(self, winner, *ignored):
+        return self.end_game_(winner)
+
+    end_game_ = lambda self, winner: (partial(self.end_game, winner),
+                                      MESSAGES['win'].format(winner))
 
     def next_player(self):
-        if self.player == X:
-            self.player = Y
+        if self.player == PLAYER_X:
+            self.player = PLAYER_Y
         else:
-            self.player = X
+            self.player = PLAYER_X
 
 class Square(Button, object):
     def __init__(self, master, x, y):
