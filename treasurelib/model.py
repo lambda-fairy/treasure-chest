@@ -4,6 +4,7 @@ from __future__ import print_function
 
 from cStringIO import StringIO
 from functools import partial
+from itertools import product
 import operator
 import string
 import sys
@@ -71,7 +72,7 @@ class Board:
 
         """
         # Check it's okay with the rule lawyers
-        self._check_move(player, start, end)
+        self.check_move(player, start, end)
 
         # Move the piece, bra
         src, dest = self.get(start), self.get(end)
@@ -86,7 +87,24 @@ class Board:
         else:
             return None
 
-    def _check_move(self, player, start, end):
+    def valid_moves_from(self, player, start):
+        """Get a list of valid moves a player can make from a certain
+        start position.
+
+        If there are no such moves, return an empty list.
+
+        """
+        valid_ends = []
+        for end in product(range(self.size), range(self.size)):
+            try:
+                self.check_move(player, start, end)
+            except InputError:
+                pass
+            else:
+                valid_ends.append(end)
+        return valid_ends
+
+    def check_move(self, player, start, end):
         """If the move is valid, do nothing; if it is invalid, raise an
         InputError."""
         if (not in_board(start, self.size) or
@@ -110,12 +128,13 @@ class Board:
         if start == self.last_move:
             raise InputError('already_moved')
 
-        if end not in self._valid_moves_from(start):
+        if end not in self._project_from(start):
             raise InputError('move_illegal')
 
-    def _valid_moves_from(self, start):
-        """Given a starting position, return a list of valid moves the
-        player can make from there."""
+    def _project_from(self, start):
+        """Given a starting position, project rays in all directions
+        until they hit another piece or the edge of the board. Return a
+        list of the positions at which they ended."""
         results = []
         for delta in [(-1, -1), (-1, 0), (-1, 1),
                       ( 0, -1),          ( 0, 1),
