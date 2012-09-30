@@ -7,9 +7,9 @@ from functools import partial
 from Tkinter import *
 import tkSimpleDialog
 
-from .model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
-from .model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
-from .messages import ERRORS, MESSAGES
+from ..model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
+from ..model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
+from .messages import MESSAGES
 from .resources import ResourceManager
 from .tk_aboutbox import AboutBox
 
@@ -157,7 +157,7 @@ class Controller:
         else:
             return self.start_move_()
 
-    start_move_ = lambda self: (self.start_move, MESSAGES['prompt_move'].format(self.player))
+    start_move_ = lambda self: (self.start_move, MESSAGES['prompt_move'](self.player))
 
     def finish_move(self, button):
         end = (button.x, button.y)
@@ -184,7 +184,7 @@ class Controller:
         return self.end_game_(winner)
 
     end_game_ = lambda self, winner: (partial(self.end_game, winner),
-                                      MESSAGES['win'].format(winner))
+                                      MESSAGES['win'](winner))
 
     def next_player(self):
         if self.player == PLAYER_X:
@@ -232,7 +232,7 @@ class Preferences(tkSimpleDialog.Dialog):
         tkSimpleDialog.Dialog.__init__(self, master)
 
     def body(self, master):
-        group = LabelFrame(master, text='Board size', padx=5, pady=5)
+        group = LabelFrame(master, text=MESSAGES['board_size'], padx=5, pady=5)
         group.pack(padx=10, pady=10)
 
         self.v = IntVar()

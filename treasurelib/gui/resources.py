@@ -3,7 +3,7 @@
 import os
 from Tkinter import PhotoImage
 
-from .model import EMPTY, S, T, X, Y
+from ..model import EMPTY, S, T, X, Y
 
 NAMES = {
     EMPTY: 'blank.gif',

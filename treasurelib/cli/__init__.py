@@ -7,7 +7,7 @@ from itertools import cycle
 import string
 import sys
 
-from .model import Board, InputError, PLAYERS, is_valid_size
+from ..model import Board, InputError, PLAYERS, is_valid_size
 from .messages import ERRORS, MESSAGES
 
 def main():
