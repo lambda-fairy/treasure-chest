@@ -10,6 +10,7 @@ import tkMessageBox
 from .model import Board, EMPTY, InputError
 from .model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
 from .messages import ERRORS, MESSAGES
+from .resources import ResourceManager
 
 COPYRIGHT = u'''
 \xA9 2012 Chris Wong.
@@ -63,6 +64,7 @@ class Application(Frame):
 class TkBoard(Frame):
     def __init__(self, master, set_status):
         Frame.__init__(self, master)
+        self.resources = ResourceManager()
         self.set_status = set_status
         self.set_status('hello')
 
@@ -173,7 +175,8 @@ class Controller:
 
 class Square(Button, object):
     def __init__(self, master, x, y):
-        Button.__init__(self, master, width=1, border=0, command=self.click)
+        Button.__init__(self, master, width=56, height=56, border=0,
+                command=self.click)
         self.grid(row=y, column=x)
         self.x = x
         self.y = y
@@ -187,7 +190,7 @@ class Square(Button, object):
 
     def set_piece(self, new):
         self._piece = new
-        self['text'] = new
+        self['image'] = self.master.resources.load(new)
 
     piece = property(get_piece, set_piece)
 
