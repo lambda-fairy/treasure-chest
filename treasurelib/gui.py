@@ -6,8 +6,9 @@ from __future__ import print_function
 from functools import partial
 from Tkinter import *
 import tkMessageBox
+import tkSimpleDialog
 
-from .model import Board, EMPTY, InputError
+from .model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
 from .model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
 from .messages import ERRORS, MESSAGES
 from .resources import ResourceManager
@@ -38,7 +39,7 @@ class Application(Frame):
 
         self.game_menu = Menu(self.menu, tearoff=False)
         self.game_menu.add_command(label='New', command=self.new)
-        self.game_menu.add_command(label='Preferences', command=lambda: print('hello'))
+        self.game_menu.add_command(label='Preferences', command=self.preferences)
         self.game_menu.add_separator()
         self.game_menu.add_command(label='About', command=self.about)
         self.game_menu.add_separator()
@@ -52,11 +53,24 @@ class Application(Frame):
         self.status.pack(fill=X, pady=5)
 
         self.board = TkBoard(self, var.set)
+        self.board_size = 5
         self.new()
 
     def new(self):
-        self.board.restart(5)
+        self.board.restart(self.board_size)
         self.board.pack()
+
+    def preferences(self):
+        prefs = Preferences(self.master, self.board_size)
+        try:
+            self.master.wait_window(prefs)
+        except TclError:  # "Bad window path name"
+            pass
+
+        new_size = prefs.result
+        if new_size is not None:
+            self.board_size = new_size
+            self.new()
 
     def about(self):
         tkMessageBox.showinfo('Treasure Chest', COPYRIGHT)
@@ -206,6 +220,25 @@ class Square(Button, object):
                 SELECTED: ('#99aaff', '#aaccff'),
                 PULSING: ('#66cc66', '#99ee99'),
                 }[mode]
+
+class Preferences(tkSimpleDialog.Dialog):
+    def __init__(self, master, board_size):
+        self._init_board_size = board_size
+        tkSimpleDialog.Dialog.__init__(self, master)
+
+    def body(self, master):
+        group = LabelFrame(master, text='Board size', padx=5, pady=5)
+        group.pack(padx=10, pady=10)
+
+        self.v = IntVar()
+        for value in range(MIN_SIZE, MAX_SIZE+1, 2):
+            b = Radiobutton(group, text=str(value), variable=self.v, value=value)
+            b.pack(anchor=W)
+            if value == self._init_board_size:
+                b.select()
+
+    def apply(self):
+        self.result = self.v.get()
 
 if __name__ == '__main__':
     main()
