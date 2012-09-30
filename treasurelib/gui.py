@@ -15,7 +15,8 @@ from .tk_aboutbox import AboutBox
 
 APP_NAME = 'Treasure Chest'
 DESCRIPTION = 'A simple board game'
-COPYRIGHT = u'Copyright \xA9 2012 Chris Wong'
+COPYRIGHT = u'''Copyright \xA9 2012 Chris Wong
+Images from the Nautical Icon Set by ~manda-pie'''
 WEBSITE = 'https://github.com/lfairy/treasure-chest'
 
 DEFAULT = 0
@@ -29,6 +30,7 @@ def main():
 
 class Application(Frame):
     def __init__(self, master):
+        master.title(APP_NAME)
         Frame.__init__(self, master)
         self.create_widgets()
         self.pack()
@@ -57,7 +59,7 @@ class Application(Frame):
 
     def new(self):
         self.board.restart(self.board_size)
-        self.board.pack()
+        self.board.pack(padx=16, pady=16)
 
     def preferences(self):
         prefs = Preferences(self.master, self.board_size)
