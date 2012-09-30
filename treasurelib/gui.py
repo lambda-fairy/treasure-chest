@@ -5,19 +5,18 @@ from __future__ import print_function
 
 from functools import partial
 from Tkinter import *
-import tkMessageBox
 import tkSimpleDialog
 
 from .model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
 from .model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
 from .messages import ERRORS, MESSAGES
 from .resources import ResourceManager
+from .tk_aboutbox import AboutBox
 
-COPYRIGHT = u'''
-\xA9 2012 Chris Wong.
-
-I like shorts, they are comfortable and easy to wear.
-'''.strip()
+APP_NAME = 'Treasure Chest'
+DESCRIPTION = 'A simple board game'
+COPYRIGHT = u'Copyright \xA9 2012 Chris Wong'
+WEBSITE = 'https://github.com/lfairy/treasure-chest'
 
 DEFAULT = 0
 SELECTED = 1
@@ -73,7 +72,11 @@ class Application(Frame):
             self.new()
 
     def about(self):
-        tkMessageBox.showinfo('Treasure Chest', COPYRIGHT)
+        about = AboutBox(self.master, APP_NAME, DESCRIPTION, COPYRIGHT, WEBSITE)
+        try:
+            self.master.wait_window(about)
+        except TclError:  # "Bad window path name"
+            pass
 
 class TkBoard(Frame):
     def __init__(self, master, set_status):
@@ -236,6 +239,19 @@ class Preferences(tkSimpleDialog.Dialog):
             b.pack(anchor=W)
             if value == self._init_board_size:
                 b.select()
+
+    def buttonbox(self):
+        box = Frame(self)
+
+        w = Button(box, text="OK", width=8, command=self.ok, default=ACTIVE)
+        w.pack(side=RIGHT, padx=5, pady=5)
+        w = Button(box, text="Cancel", width=8, command=self.cancel)
+        w.pack(side=RIGHT, padx=5, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack(side=RIGHT)
 
     def apply(self):
         self.result = self.v.get()
