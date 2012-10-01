@@ -1,0 +1,88 @@
+#!/bin/echo This is a template file, and is not supposed to be run directly --
+
+# Bootstrap code ripped mercilessly from py.test :)
+
+# Two variables should be defined above:
+#   + sources: a base64 encoded, zlib compressed, pickled dictionary
+#     mapping file names to source strings
+#   + entry: a string containing the code to run
+
+import sys
+import base64
+import zlib
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+class DictImporter(object):
+    def __init__(self, sources):
+        self.sources = sources
+
+    def find_module(self, name, path=None):
+        # print "find_module:", name
+        fullname = name.replace('.', '/')
+        if fullname + '.py' in self.sources:
+            return self
+        if fullname + '/__init__.py' in self.sources:
+            return self
+        return None
+
+    def load_module(self, name):
+        # print "load_module:", name
+        fullname = name.replace('.', '/')
+        from types import ModuleType
+        try:
+            s = self.sources[fullname + '.py']
+            is_pkg = False
+        except KeyError:
+            s = self.sources[fullname + '/__init__.py']
+            is_pkg = True
+
+        co = compile(s, fullname, 'exec')
+        module = sys.modules.setdefault(name, ModuleType(name))
+        module.__file__ = "%s/%s" % (__file__, fullname)
+        module.__loader__ = self
+        if is_pkg:
+            module.__path__ = [fullname]
+
+        do_exec(co, module.__dict__)
+        return sys.modules[name]
+
+    def get_source(self, name):
+        fullname = name.replace('.', '/')
+        res = self.sources.get(fullname + '.py')
+        if res is None:
+            res = self.sources.get(name + '/__init__.py')
+        return res
+
+def override_open(sources):
+    def open_(name, mode='r'):
+        mode = mode.replace('b', '')
+        if mode != 'r':
+            raise ValueError("only mode 'r' is supported, not '%s'" % mode)
+        else:
+            return StringIO(sources[name])
+    return open_
+
+if __name__ == "__main__":
+    if sys.version_info >= (3, 0):
+        exec("def do_exec(co, loc): exec(co, loc)\n")
+        import pickle
+        sources = sources.encode("ascii") # ensure bytes
+        sources = pickle.loads(zlib.decompress(base64.decodebytes(sources)))
+    else:
+        import cPickle as pickle
+        exec("def do_exec(co, loc): exec co in loc\n")
+        sources = pickle.loads(zlib.decompress(base64.decodestring(sources)))
+        # sources = {'duck.py': 'def quack():\n    print("Quack, I say.")'}
+
+    importer = DictImporter(sources)
+    sys.meta_path.append(importer)
+
+    locals_ = locals().copy()
+    locals_['open'] = override_open(sources)
+
+    # entry = "import duck; print(open('duck.py').read()); duck.quack()"
+    do_exec(entry, locals_)

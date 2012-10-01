@@ -1,5 +1,7 @@
-"""A simple class that loads and caches images."""
+"""Loads and caches images used by the GUI."""
 
+from base64 import b64encode
+from functools import wraps
 import os
 from Tkinter import PhotoImage
 
@@ -13,18 +15,29 @@ NAMES = {
     Y: 'boat_b.gif',
     }
 
-class ResourceManager:
-    def __init__(self):
-        self.pics = {}
-
-    def load(self, key):
-        name = NAMES[key]
+def memoize(f):
+    cache = {}
+    @wraps(f)
+    def newf(*args):
         try:
-            return self.pics[name]
+            return cache[args]
         except KeyError:
-            pic = PhotoImage(file=get_file_name(name))
-            self.pics[name] = pic
-            return pic
+            result = f(*args)
+            cache[args] = result
+            return result
+    return newf
 
-def get_file_name(name):
-    return os.path.join('resources', name)
+@memoize
+def load_image(key):
+    name = NAMES[key]
+    data = read_resource(name)
+    return PhotoImage(data=b64encode(data))
+
+def read_resource(name):
+    name = os.path.join('resources', name)
+    try:
+        import _resources
+        return _resources.get(name)
+    except ImportError:
+        with open(name) as f:
+            return f.read()

@@ -10,7 +10,7 @@ import tkSimpleDialog
 from ..model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
 from ..model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
 from .messages import MESSAGES
-from .resources import ResourceManager
+from .resources import load_image
 from .tk_aboutbox import AboutBox
 
 APP_NAME = 'Treasure Chest'
@@ -83,7 +83,6 @@ class Application(Frame):
 class TkBoard(Frame):
     def __init__(self, master, set_status):
         Frame.__init__(self, master)
-        self.resources = ResourceManager()
         self.set_status = set_status
         self.set_status('hello')
 
@@ -209,7 +208,7 @@ class Square(Button, object):
 
     def set_piece(self, new):
         self._piece = new
-        self['image'] = self.master.resources.load(new)
+        self['image'] = load_image(new)
 
     piece = property(get_piece, set_piece)
 
