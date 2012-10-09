@@ -35,9 +35,5 @@ def load_image(key):
 
 def read_resource(name):
     name = os.path.join('resources', name)
-    try:
-        import _resources
-        return _resources.get(name)
-    except ImportError:
-        with open(name) as f:
-            return f.read()
+    with open(name) as f:
+        return f.read()
