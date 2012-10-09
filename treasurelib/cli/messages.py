@@ -36,8 +36,8 @@ else:
     ERROR_MOVE_FORMAT = "Invalid input format"
     ERROR_MOVE_ILLEGAL = "Illegal move"
 
-    ERRORS_BORING = {
-        'size': "Size must be an odd number between {0} and {1}".format(MIN_SIZE, MAX_SIZE),
+    ERRORS = {
+        'size': ERROR_MOVE_SIZE,
         'move_length': ERROR_MOVE_LENGTH,
         'move_format': ERROR_MOVE_FORMAT,
         'off_board': ERROR_MOVE_POSITION,
