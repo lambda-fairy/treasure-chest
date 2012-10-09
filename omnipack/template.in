@@ -9,12 +9,8 @@
 
 import sys
 import base64
+from io import StringIO
 import zlib
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 class DictImporter(object):
     def __init__(self, sources):
@@ -47,7 +43,7 @@ class DictImporter(object):
         if is_pkg:
             module.__path__ = [fullname]
 
-        do_exec(co, module.__dict__)
+        exec(co, module.__dict__)
         return sys.modules[name]
 
     def get_source(self, name):
@@ -58,25 +54,51 @@ class DictImporter(object):
         return res
 
 def override_open(sources):
-    def open_(name, mode='r'):
-        mode = mode.replace('b', '')
-        if mode != 'r':
-            raise ValueError("only mode 'r' is supported, not '%s'" % mode)
+    def open_(name, mode='rt'):
+        base, text = parse_mode(mode)
+
+        if base != 'r':
+            raise IOError('cannot write to read-only file')
+
+        try:
+            contents = sources[name]
+        except KeyError:
+            raise IOError('file not found: {}'.format(name))
+
+        if text:
+            return StringIO(contents)
         else:
-            return StringIO(sources[name])
+            return BytesIO(contents)
+
+    def parse_mode(mode):
+        if len(mode) == 1:
+            return parse_rw(mode[0]), True
+        elif len(mode) == 2:
+            return parse_rw(mode[0]), parse_bt(mode[1])
+        else:
+            raise ValueError("invalid mode: '{}'".format(mode))
+
+    def parse_rw(rw):
+        if rw in ('r', 'w', 'a'):
+            return rw
+        else:
+            raise ValueError("unsupported mode '{}'".format(rw))
+
+    def parse_bt(bt):
+        try:
+            return ('b', 't').index(bt)
+        except IndexError:
+            raise ValueError("mode must be one of 'b' or 't', not '{}'".format(bt))
+
     return open_
 
 if __name__ == "__main__":
     if sys.version_info >= (3, 0):
-        exec("def do_exec(co, loc): exec(co, loc)\n")
         import pickle
         sources = sources.encode("ascii") # ensure bytes
         sources = pickle.loads(zlib.decompress(base64.decodebytes(sources)))
     else:
-        import cPickle as pickle
-        exec("def do_exec(co, loc): exec co in loc\n")
-        sources = pickle.loads(zlib.decompress(base64.decodestring(sources)))
-        # sources = {'duck.py': 'def quack():\n    print("Quack, I say.")'}
+        raise SystemExit('Sorry, Python 2 is not supported')
 
     importer = DictImporter(sources)
     sys.meta_path.append(importer)
@@ -84,5 +106,4 @@ if __name__ == "__main__":
     locals_ = locals().copy()
     locals_['open'] = override_open(sources)
 
-    # entry = "import duck; print(open('duck.py').read()); duck.quack()"
-    do_exec(entry, locals_)
+    exec(entry, locals_)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from datetime import datetime
 import omnipack
@@ -45,12 +45,14 @@ treasurelib/__init__.py
 def main():
     sources = {}
     for name in FILES:
-        sources[name] = open(name).read()
+        sources[name] = open(name, 'rb').read()
 
-    entry = 'from treasurelib import gui; gui.main()'
+    entry = 'import treasurelib.gui as gui; gui.main()'
 
-    with open('treasureChestgui.py', 'w') as outfile:
+    output = 'treasure_chest.py'
+    with open(output, 'w') as outfile:
         omnipack.pack(PROLOGUE, sources, entry, outfile)
+    print('Written successfully to', output)
 
 if __name__ == '__main__':
     main()

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Simple command line interface"""
 
 from __future__ import print_function
@@ -56,7 +55,7 @@ def read_with(reader, key, *args):
     message = MESSAGES[key].format(*args)
     while True:
         try:
-            return reader(raw_input(message).strip())
+            return reader(input(message).strip())
         except InputError as ex:
             print(ERRORS[ex.key])
 
@@ -90,6 +89,3 @@ def parse_position(s):
         raise InputError('move_format')
 
     return string.ascii_uppercase.index(s[0].upper()), int(s[1]) - 1
-
-if __name__ == '__main__':
-    play()

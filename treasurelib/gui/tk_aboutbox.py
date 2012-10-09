@@ -1,8 +1,8 @@
 """Exports an ``AboutBox`` class, for creating GTK-style about boxes."""
 
-from Tkinter import Button, Frame, Label, ACTIVE, RIGHT
-import tkFont
-from tkSimpleDialog import Dialog
+from tkinter import Button, Frame, Label, ACTIVE, RIGHT
+from tkinter.font import BOLD
+from tkinter.simpledialog import Dialog
 
 from .tk_hyperlink import Hyperlink
 from .tk_util import modify_font
@@ -20,7 +20,7 @@ class AboutBox(Dialog):
         if self.app_name:
             self.title(self.app_name)
             label = Label(master, text=self.app_name)
-            modify_font(label, size=12, weight=tkFont.BOLD)
+            modify_font(label, size=12, weight=BOLD)
             label.pack()
 
         if self.description:

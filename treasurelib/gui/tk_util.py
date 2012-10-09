@@ -1,6 +1,6 @@
 """Miscellaneous utilities for working with Tkinter."""
 
-from tkFont import Font
+from tkinter.font import Font
 
 def modify_font(widget, **attrs):
     """Change the font used by a widget, by applying the given

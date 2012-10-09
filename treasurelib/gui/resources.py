@@ -3,7 +3,7 @@
 from base64 import b64encode
 from functools import wraps
 import os
-from Tkinter import PhotoImage
+from tkinter import PhotoImage
 
 from ..model import EMPTY, S, T, X, Y
 
@@ -35,5 +35,5 @@ def load_image(key):
 
 def read_resource(name):
     name = os.path.join('resources', name)
-    with open(name) as f:
+    with open(name, 'rb') as f:
         return f.read()

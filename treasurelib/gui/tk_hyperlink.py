@@ -1,6 +1,6 @@
 """Exports a ``Hyperlink`` class, for creating clickable links."""
 
-from Tkinter import Label
+from tkinter import Label
 import webbrowser
 
 from .tk_util import modify_font

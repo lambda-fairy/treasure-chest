@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from treasurelib import gui
+import treasurelib.gui as gui
 gui.main()

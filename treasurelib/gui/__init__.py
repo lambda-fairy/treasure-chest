@@ -1,11 +1,8 @@
-#!/usr/bin/env python
 """Treasure Chest GUI using Tkinter."""
 
-from __future__ import print_function
-
 from functools import partial
-from Tkinter import *
-import tkSimpleDialog
+from tkinter import *
+from tkinter import simpledialog
 
 from ..model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
 from ..model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
@@ -15,7 +12,7 @@ from .tk_aboutbox import AboutBox
 
 APP_NAME = 'Treasure Chest'
 DESCRIPTION = 'A simple board game'
-COPYRIGHT = u'''Copyright \xA9 2012 Chris Wong
+COPYRIGHT = '''Copyright \xA9 2012 Chris Wong
 Images from the Nautical Icon Set by ~manda-pie'''
 WEBSITE = 'https://github.com/lfairy/treasure-chest'
 
@@ -225,10 +222,10 @@ class Square(Button, object):
                 PULSING: ('#66cc66', '#99ee99'),
                 }[mode]
 
-class Preferences(tkSimpleDialog.Dialog):
+class Preferences(simpledialog.Dialog):
     def __init__(self, master, board_size):
         self._init_board_size = board_size
-        tkSimpleDialog.Dialog.__init__(self, master)
+        simpledialog.Dialog.__init__(self, master)
 
     def body(self, master):
         group = LabelFrame(master, text=MESSAGES['board_size'], padx=5, pady=5)
@@ -256,6 +253,3 @@ class Preferences(tkSimpleDialog.Dialog):
 
     def apply(self):
         self.result = self.v.get()
-
-if __name__ == '__main__':
-    main()

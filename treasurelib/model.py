@@ -1,9 +1,7 @@
 """The Treasure Chest model: the 'M' part of MVC"""
 
-from __future__ import print_function
-
-from cStringIO import StringIO
 from functools import partial
+from io import StringIO
 from itertools import product
 import operator
 import string

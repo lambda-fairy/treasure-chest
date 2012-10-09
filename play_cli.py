@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from treasurelib import cli
+import treasurelib.cli as cli
 cli.main()

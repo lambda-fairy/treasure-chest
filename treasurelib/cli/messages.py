@@ -7,11 +7,11 @@ BORING = False
 
 MESSAGES = {
     'prompt_size': "Board size: ",
-    'prompt_move': "Player {0}, enter move: ",
-    'win': "Win for player {0}!",
+    'prompt_move': "Player {}, enter move: ",
+    'win': "Win for player {}!",
     }
 
-ERROR_MOVE_SIZE = "Size must be an odd number between {0} and {1}".format(MIN_SIZE, MAX_SIZE)
+ERROR_MOVE_SIZE = "Size must be an odd number between {} and {}".format(MIN_SIZE, MAX_SIZE)
 
 if not BORING:
     # Interesting error messages
