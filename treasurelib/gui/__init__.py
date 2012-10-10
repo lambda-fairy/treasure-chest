@@ -4,8 +4,8 @@ from functools import partial
 from tkinter import *
 from tkinter import simpledialog
 
-from ..model import Board, EMPTY, InputError, MIN_SIZE, MAX_SIZE
-from ..model import X as PLAYER_X, Y as PLAYER_Y  # X and Y conflict with Tkinter
+from .. import model
+from ..model import Board, InputError, MIN_SIZE, MAX_SIZE
 from .messages import MESSAGES
 from .resources import load_image
 from .tk_aboutbox import AboutBox
@@ -71,7 +71,8 @@ class Application(Frame):
             self.new()
 
     def about(self):
-        about = AboutBox(self.master, APP_NAME, DESCRIPTION, COPYRIGHT, WEBSITE)
+        icon = load_image(model.T)
+        about = AboutBox(self.master, icon, APP_NAME, DESCRIPTION, COPYRIGHT, WEBSITE)
         try:
             self.master.wait_window(about)
         except TclError:  # "Bad window path name"
@@ -127,7 +128,7 @@ class Controller:
     def __init__(self, view, size):
         self.board = Board(size)
         self.view = view
-        self.player = PLAYER_X
+        self.player = model.X
 
         self.handler, message = self.start_move_()
         self.view.set_status(message)
@@ -183,10 +184,10 @@ class Controller:
                                       MESSAGES['win'](winner))
 
     def next_player(self):
-        if self.player == PLAYER_X:
-            self.player = PLAYER_Y
+        if self.player == model.X:
+            self.player = model.Y
         else:
-            self.player = PLAYER_X
+            self.player = model.X
 
 class Square(Button, object):
     def __init__(self, master, x, y):
@@ -197,7 +198,7 @@ class Square(Button, object):
         self.y = y
 
         # Reset the button state
-        self.piece = EMPTY
+        self.piece = model.EMPTY
         self.placate()
 
     def get_piece(self):
@@ -228,6 +229,8 @@ class Preferences(simpledialog.Dialog):
         simpledialog.Dialog.__init__(self, master)
 
     def body(self, master):
+        self.title(APP_NAME + ' Preferences')
+
         group = LabelFrame(master, text=MESSAGES['board_size'], padx=5, pady=5)
         group.pack(padx=10, pady=10)
 

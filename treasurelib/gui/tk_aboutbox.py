@@ -8,8 +8,9 @@ from .tk_hyperlink import Hyperlink
 from .tk_util import modify_font
 
 class AboutBox(Dialog):
-    def __init__(self, master, app_name, description=None, copyright=None, website=None):
+    def __init__(self, master, icon=None, app_name=None, description=None, copyright=None, website=None):
         self.app_name = app_name
+        self.icon = icon
         self.description = description
         self.copyright = copyright
         self.website = website
@@ -17,8 +18,12 @@ class AboutBox(Dialog):
         Dialog.__init__(self, master)
 
     def body(self, master):
+        if self.icon:
+            label = Label(master, image=self.icon)
+            label.pack(pady=10)
+
         if self.app_name:
-            self.title(self.app_name)
+            self.title('About ' + self.app_name)
             label = Label(master, text=self.app_name)
             modify_font(label, size=12, weight=BOLD)
             label.pack()
